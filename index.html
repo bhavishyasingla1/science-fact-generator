@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One-Button Science</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the 3D card flip */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .scene {
+            perspective: 1000px;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden; /* Safari */
+            border-radius: 1rem; /* 16px */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        .card-face-front {
+            background-color: #ffffff;
+            color: #1f2937;
+        }
+        .card-face-back {
+            background-color: #4f46e5; /* Indigo 600 */
+            color: #ffffff;
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-md mx-4">
+        <div class="scene h-80 md:h-96">
+            <div id="scienceCard" class="card">
+                <!-- Front of the card -->
+                <div class="card-face card-face-front">
+                    <div class="text-center">
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">One-Button Science</h1>
+                        <p class="text-gray-600 mb-6">Click for a dose of discovery!</p>
+                        <button id="flipButton" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 transform hover:scale-105">
+                            Show me something cool
+                        </button>
+                    </div>
+                </div>
+                <!-- Back of the card -->
+                <div class="card-face card-face-back">
+                    <div class="text-center">
+                        <p id="factText" class="text-xl md:text-2xl font-medium mb-6"></p>
+                        <button id="newFactButton" class="bg-white text-indigo-600 font-bold py-2 px-5 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 transform hover:scale-105">
+                           Another One!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const facts = [
+            // --- Original & Previously Added Facts ---
+            { type: "Fact", text: "A single teaspoon of a neutron star would weigh about 6 billion tons." },
+            { type: "Fact", text: "Octopuses have three hearts and blue blood." },
+            { type: "Experiment", text: "Mini-Experiment: Drop food coloring into cold and hot water. The color spreads faster in hot water due to faster-moving molecules (diffusion)." },
+            { type: "Fact", text: "The Eiffel Tower can be 15 cm taller during the summer due to thermal expansion." },
+            { type: "Experiment", text: "Mini-Experiment: Rub a balloon on your hair, then hold it near running water. The water will bend towards the balloon due to static electricity." },
+            { type: "Fact", text: "Honey never spoils. Archaeologists found 3,000-year-old honey that's still edible." },
+            { type: "Fact", text: "A day on Venus is longer than a year on Venus." },
+            { type: "Experiment", text: "Mini-Experiment: Create a mini-volcano with baking soda, dish soap, and vinegar." },
+            { type: "Fact", text: "Bananas are slightly radioactive due to their Potassium-40 content." },
+            { type: "Fact", text: "It takes about 8 minutes and 20 seconds for light from the Sun to reach Earth." },
+            { type: "Fact", text: "Sharks are older than trees, dating back 400 million years." },
+            { type: "Fact", text: "The Turritopsis dohrnii jellyfish is considered biologically immortal." },
+            { type: "Fact", text: "Wombat feces are cube-shaped, likely to stop them from rolling away." },
+            { type: "Experiment", text: "Mini-Experiment: Create a 'naked' egg by dissolving its shell in vinegar for 2-3 days." },
+            { type: "Fact", text: "There is a giant cloud of alcohol (ethyl alcohol) in space in Sagittarius B2." },
+            { type: "Fact", text: "The Earth's core is approximately as hot as the surface of the Sun." },
+            { type: "Fact", text: "A cat's purr vibrates at a frequency that may promote bone healing." },
+            { type: "Fact", text: "It can rain diamonds on planets like Neptune and Uranus." },
+            { type: "Fact", text: "Humans emit a faint light (bioluminescence), but it's too weak for our eyes to see." },
+            
+            // --- Over 50 New Facts ---
+            { type: "Fact", text: "The human brain operates on about 20 watts of power, similar to a dim light bulb." },
+            { type: "Fact", text: "Sound cannot travel in a vacuum because there are no molecules to vibrate." },
+            { type: "Fact", text: "The smell of freshly cut grass is actually a plant distress call." },
+            { type: "Fact", text: "Slime molds are single-celled organisms that can join together to form a single large 'superorganism' and solve mazes." },
+            { type: "Fact", text: "The universe has no center and is expanding in all directions at once." },
+            { type: "Experiment", text: "Mini-Experiment: Float a needle on water. Place a drop of soap near it. The soap breaks the water's surface tension, causing the needle to dart away." },
+            { type: "Fact", text: "A photon can take thousands of years to travel from the Sun's core to its surface, but only 8 minutes from the surface to Earth." },
+            { type: "Fact", text: "Mantis shrimp can punch with the force of a .22 caliber bullet, so fast it boils the water around their claws (sonoluminescence)." },
+            { type: "Fact", text: "The element Gallium is a metal that will melt in your hand due to its low melting point of 29.76 °C (85.58 °F)." },
+            { type: "Fact", text: "There are more trees on Earth than stars in the Milky Way galaxy." },
+            { type: "Fact", text: "The axolotl can regenerate not just its limbs, but also its spinal cord and even parts of its brain." },
+            { type: "Fact", text: "If you drilled a tunnel straight through the Earth and jumped in, it would take you about 42 minutes to get to the other side (ignoring air resistance and heat)." },
+            { type: "Fact", text: "The quietest place on Earth, an anechoic chamber at Microsoft's headquarters, is so silent you can hear your own organs working." },
+            { type: "Experiment", text: "Mini-Experiment: Make a simple compass. Magnetize a needle by rubbing it on a magnet, then place it on a floating cork in water. It will align with the Earth's magnetic field." },
+            { type: "Fact", text: "Neutrinos are subatomic particles that pass through almost all matter. Trillions are passing through your body every second." },
+            { type: "Fact", text: "The footprints left by Apollo astronauts on the Moon will likely remain there for at least 100 million years because there is no wind or water to erode them." },
+            { type: "Fact", text: "Glass is an amorphous solid, which means it's technically a liquid that flows very, very slowly over centuries." },
+            { type: "Fact", text: "The tardigrade (or 'water bear') is one of the most resilient animals known, able to survive in the vacuum of space, extreme temperatures, and high radiation." },
+            { type: "Fact", text: "Cows have best friends and can become stressed when they are separated." },
+            { type: "Fact", text: "The Great Barrier Reef is the largest living structure on Earth and can be seen from space." },
+            { type: "Fact", text: "Your stomach's digestive acids are strong enough to dissolve zinc." },
+            { type: "Fact", text: "The wood frog can freeze solid during winter and thaw back to life in the spring." },
+            { type: "Fact", text: "There's a planet, 55 Cancri e, that is believed to be made largely of diamond." },
+            { type: "Fact", text: "The 'blue' in a blue whale's blowhole spray is not water, but vaporized lung mucus." },
+            { type: "Fact", text: "A cloud can weigh over a million pounds." },
+            { type: "Fact", text: "The pistol shrimp can snap its claw shut so fast it creates a bubble that momentarily reaches the temperature of the sun's surface." },
+            { type: "Fact", text: "There are more possible iterations of a game of chess than there are atoms in the known universe." },
+            { type: "Fact", text: "The Earth is not a perfect sphere; it bulges at the equator due to its rotation." },
+            { type: "Fact", text: "A gecko's feet are covered in millions of microscopic hairs that give them their climbing ability, using van der Waals forces." },
+            { type: "Fact", text: "The largest volcano in our solar system is Olympus Mons on Mars, which is three times the height of Mount Everest." },
+            { type: "Fact", text: "Butterflies taste with their feet." },
+            { type: "Fact", text: "If you uncoiled all the DNA in your body, it would stretch from the Sun to Pluto and back." },
+            { type: "Fact", "text": "The metallic taste you get after touching coins is not the metal, but a chemical reaction with your skin's oils." },
+            { type: "Fact", "text": "Sunflowers can be used to clean up radioactive soil, a process called phytoremediation." },
+            { type: "Fact", "text": "The 'smell of rain' is caused by a compound called geosmin, produced by soil-dwelling bacteria." },
+            { type: "Fact", "text": "Spiders use Earth's electric field to 'fly' or 'balloon' for hundreds of miles." },
+            { type: "Fact", "text": "The human eye can distinguish about 10 million different colors." },
+            { type: "Fact", "text": "In zero gravity, a candle flame is round and blue." },
+            { type: "Fact", "text": "The bombardier beetle can shoot a boiling, noxious chemical spray from its abdomen as a defense mechanism." },
+            { type: "Fact", "text": "The average cumulus cloud weighs about 1.1 million pounds (or 500,000 kg)." },
+            { type: "Fact", "text": "Goats have rectangular pupils, which gives them a wider field of vision (320-340 degrees) to spot predators." },
+            { type: "Fact", "text": "The color of a star depends on its temperature. Hotter stars are blue or white, while cooler stars are red or orange." },
+            { type: "Fact", "text": "The brain of an ostrich is smaller than its eyeball." },
+            { type: "Fact", "text": "The phenomenon of 'seeing stars' is called phosphenes, caused by pressure on your retina." },
+            { type: "Fact", "text": "The world's largest desert is not the Sahara, but Antarctica, as a desert is defined by its low precipitation." },
+            { type: "Fact", "text": "A platypus is one of the few venomous mammals. The male has a spur on its hind foot that delivers a painful venom." },
+            { type: "Fact", "text": "The speed of light is not constant; it can be slowed down when it passes through different mediums." },
+            { type: "Fact", "text": "There is enough gold in the Earth's core to coat its entire surface in a 1.5-foot-thick layer." },
+            { type: "Fact", "text": "The 'butterfly effect' is a real concept in chaos theory, where a small change in initial conditions can lead to large, unpredictable outcomes." },
+            { type: "Fact", "text": "Water can exist in three states at once (solid, liquid, gas) at a specific temperature and pressure known as the 'triple point'." },
+            { type: "Fact", "text": "The Lyrebird can mimic almost any sound it hears, from a chainsaw to a camera shutter to other birds' songs." },
+            { type: "Fact", "text": "About 99% of your body's mass is made up of just six elements: oxygen, carbon, hydrogen, nitrogen, calcium, and phosphorus." }
+        ];
+
+        const card = document.getElementById('scienceCard');
+        const flipButton = document.getElementById('flipButton');
+        const newFactButton = document.getElementById('newFactButton');
+        const factText = document.getElementById('factText');
+        
+        let currentFactIndex = -1;
+
+        function showNewFact() {
+            // Ensure we don't show the same fact twice in a row, especially with a large list
+            if (facts.length < 2) {
+                factText.innerHTML = facts.length > 0 ? facts[0].text : "No facts available.";
+                return;
+            }
+
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * facts.length);
+            } while (newIndex === currentFactIndex);
+            currentFactIndex = newIndex;
+            
+            const fact = facts[currentFactIndex];
+            factText.innerHTML = `<strong class='block mb-2 text-indigo-200'>${fact.type}:</strong> ${fact.text}`;
+        }
+
+        // Event listener for the main button on the front
+        flipButton.addEventListener('click', () => {
+            if (!card.classList.contains('is-flipped')) {
+                showNewFact();
+                card.classList.add('is-flipped');
+            }
+        });
+
+        // Event listener for the button on the back
+        newFactButton.addEventListener('click', () => {
+            // To give a sense of change, we flip back, change the content, then flip forward again.
+            card.classList.remove('is-flipped');
+            
+            // Wait for the flip-back animation to almost complete before changing the text and flipping again
+            setTimeout(() => {
+                showNewFact();
+                // A nested timeout to ensure the content changes before the flip starts
+                setTimeout(() => {
+                    card.classList.add('is-flipped');
+                }, 100);
+            }, 500); // This delay should be slightly less than the CSS transition time
+        });
+
+    </script>
+</body>
+</html>
